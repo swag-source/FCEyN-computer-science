@@ -1,197 +1,258 @@
-# Four-Month Study Strategy: Architecture & Organization of Computers + Language Theory & Automata
+# Study Structure — Teoría de los Lenguajes (recursada)
 
 ## Context
 
-Two demanding, formally different courses compressed into ~4 months, on top of ~30h/week flexible work, 3-4x/week training, and protected family/relationship time. Fixed class load is unusually front-loaded: **15 contact hours across three consecutive evenings (Mon/Tue/Wed, 17:00-22:00)**, which effectively removes Mon-Wed as deep-study days and concentrates the real study burden onto Thu-Sun. The core success metric the user set: reach every exam with the syllabus for that exam fully learned **one week early**, so the last week is pure practice/recall, not first-pass learning.
+Single course, second pass. The syllabus is already familiar: this is **not** a first-contact plan, and treating it like one is the main way to waste the advantage. Constraints:
 
-Exam structure (per user): 2 parciales + recuperatorio + final, per course — exact dates not yet published. This plan uses relative week numbers; once dates land, phase boundaries get pinned to real calendar dates.
+- **Class:** attending **prácticas only** (no teóricas). The práctica is the weekly anchor and the main forcing function for problem-solving.
+- **Study budget:** ~8-10h/week of deliberate work outside class.
+- **Exams:** 2 parciales + recuperatorio + final.
+- **Core rule (carried over, still the metric that matters):** for *each* exam, that exam's syllabus must be **Green** (§8) **7 days before the date**. The last week is pure past-exam practice, never first-pass learning.
+
+Dates below are relative weeks, with **Week 1 = 17-23 Aug 2026** as the working assumption for the 2°C 2026. Pin real dates as soon as the cátedra publishes them and shift phase boundaries accordingly — the phase *order* is what's load-bearing, not the week numbers.
 
 ---
 
-## 1. Course comparison — why the strategies differ
+## 1. What changes because you've already taken this course
 
-| | Architecture & Org. of Computers | Language Theory & Automata |
+| | First pass | This pass |
 |---|---|---|
-| Nature | Broad, technical, detail-heavy (registers, descriptors, opcodes, structures) | Narrow, deep, formal/mathematical |
-| Dependency structure | Real but partially modular — later topics *lean on* earlier ones, but a weak Ch.5 doesn't fully block Ch.9 | Strictly cumulative — weak DFA fluency actively breaks every later chapter |
-| Best learning mode | Diagrams, execution traces, structure memorization, small asm exercises | Repeated problem-solving, proof construction, redoing failed attempts |
-| Danger mode | Passive rereading of dense OS-mechanics slides | Reading definitions without ever constructing/proving anything |
-| Practice-vs-passive skew | ~50/50 early, shifts to practice-heavy for topics 6-10 | ~80% practice from week 1 onward |
+| Bottleneck | Understanding the definitions | **Recall speed + proof construction under time pressure** |
+| Right ratio | ~50% reading / 50% practice | **~85% practice from week 1** |
+| First move on a topic | Read the teórica, then try problems | **Try the problems cold, read only what the attempt exposes** |
+| Main failure mode | Getting lost | **False familiarity** — "I know this" from recognition, not from being able to produce it |
 
-**Implication:** Language Theory gets priority for *fast* practice after each class (fluency compounds), while Architecture can absorb slightly more delay between learning and practicing a given topic, but needs more repetition on the OS-mechanics chapters (7-10) specifically.
+**The recursante trap, explicitly:** recognition ≠ production. You will read a pumping-lemma proof and feel it's obvious, then fail to construct one for a new language under 40 minutes of exam pressure. Every topic in this plan is graded on *what you can produce from a blank page*, never on whether it looks familiar.
 
----
-
-## 2. Topic dependency map
-
-**Architecture & Organization of Computers**
-```
-1. Intro (User/Kernel mode concept)
-        │
-2. Intel 64 Architecture (modes, memory models, addressing, segmentation, ISA)  ◄── FOUNDATION
-        │
-   ┌────┼────────────┬───────────────┐
-   ▼    ▼             ▼               ▼
-3. Asm/Linking   5. SIMD/MMX/SSE  7-10. OS Programming Model
-   /Loading            │           (Memory Mgmt → Interrupts → Protection → Task Mgmt)
-   │                   │              — these four are themselves sequential/interlocking
-4. Asm/HLL              │              (paging underlies task-switch & protection)
-   Interface            │                        │
-   │                    │                        │
-   └──────────┬─────────┴────────────┬───────────┘
-              ▼                      ▼
-        6. Microarchitecture   11. Optimization (synthesis of 5, 6, 7-10)
-        (pipeline, cache,
-         superscalar, OOO)
-```
-Topic 6 (Microarchitecture) is conceptually independent enough to start early in parallel with 3/4, but exam questions on it often assume topic 2 fluency (addressing/segments feed into pipeline/cache discussions).
-
-**Language Theory & Automata** — strictly linear, treat as a chain:
-```
-Chomsky hierarchy (orientation)
-   │
-Regular languages → DFA → NFA → Regex   ◄── FOUNDATION, must become fast/automatic
-   │
-Non-regular languages + Pumping Lemma (regular)   ◄── BOTTLENECK #1
-   │
-Context-free languages → Pushdown Automata
-   │
-Deterministic CFL (subtlety layer)
-   │
-Non-CF languages + Pumping Lemma (CF)   ◄── BOTTLENECK #2
-   │
-Turing Machines → Partial computable functions → Church-Turing thesis
-   │
-S++ / program encoding / Universal interpreter
-   │
-Halting problem + Diagonalization   ◄── BOTTLENECK #3
-   │
-Computable / Computably enumerable languages (synthesis)
-```
+**Three concrete consequences:**
+1. **Diagnostic first, plan second.** Week 1 is a cold past parcial (§4, Phase 0). What survived from last time is unknown until measured, and half this plan's value is discovering which third of the syllabus actually needs the hours.
+2. **Never skip a guía exercise because you solved it last year.** Solve it again from scratch, or explicitly mark it Green after solving *one variant* of it cold. Those are the only two allowed options.
+3. **You can afford depth on the hard third.** The time you save on DFA/NFA mechanics goes to the bottlenecks (§3), not to finishing early.
 
 ---
 
-## 3. Risk classification (topics most likely to become bottlenecks)
+## 2. Topic map — strictly linear chain, split by exam
 
-**🔴 High risk — protect these, never let them slip past "1 week ahead":**
-- Intel64 addressing/segmentation (Arch #2) — foundation; postponing it degrades everything downstream.
-- OS Memory Mgmt / Interrupts / Protection / Task Mgmt (Arch #7-10) — dense, detail-heavy, easy to deprioritize because it "feels like OS trivia," but usually exam-heavy and interlocking.
-- Pumping Lemma, regular AND context-free (Lang Theory) — classic "I understand the definition but can't apply it under pressure" topic. Needs dedicated repeated-attempt sessions, not one pass.
-- Non-context-freeness / DCFL subtleties (Lang Theory) — proof-construction skill, degrades fast without practice.
-- Halting problem / Diagonalization (Lang Theory) — abstract proof technique; needs many worked variants before it clicks.
-- DFA/NFA/Regex fluency (Lang Theory) — not individually "hard," but if it's not *fast and automatic* early, every later chapter's cognitive cost multiplies.
+```
+Definición de lenguaje formal + Jerarquía de Chomsky        (orientation)
+   │
+┌──┴─────────────────── PARCIAL 1 ──────────────────────────┐
+│                                                            │
+│  Lenguajes regulares: AFD → AFND → expresiones regulares   │  ◄── must be automatic
+│     │                                                      │
+│  Lenguajes NO regulares + Lema de bombeo (regular)         │  ◄── BOTTLENECK #1
+│     │                                                      │
+│  Lenguajes libres de contexto → autómatas de pila (AP)     │
+│     │                                                      │
+│  Lenguajes determinísticos (DCFL)                          │  ◄── subtlety layer
+│     │                                                      │
+│  Lenguajes NO libres de contexto + Lema de bombeo (LC)     │  ◄── BOTTLENECK #2
+└────────────────────────────────────────────────────────────┘
+   │
+┌──┴─────────────────── PARCIAL 2 ──────────────────────────┐
+│                                                            │
+│  Máquinas de Turing (determinísticas)                      │
+│     │                                                      │
+│  Funciones parcialmente computables → Tesis de Church      │
+│     │                                                      │
+│  Lenguaje S++ y codificación de programas                  │  ◄── formalism shift
+│     │                                                      │
+│  Intérprete universal                                      │
+│     │                                                      │
+│  Halting problem + Diagonalización                         │  ◄── BOTTLENECK #3
+│     │                                                      │
+│  Lenguajes computables y computablemente enumerables       │  ◄── synthesis
+└────────────────────────────────────────────────────────────┘
+   │
+FINAL = both blocks + the connections between them (§6, Phase 5)
+```
+
+**Confirm the split with the cátedra in Week 1.** Some years Parcial 1 stops at the pumping lemma for regulars and Parcial 2 absorbs the whole CFL block. If that's the case, shift Phase 2 one exam later — everything else in this plan holds unchanged.
+
+The chain is genuinely cumulative: weak AFD/AFND fluency multiplies the cost of every later topic, and a shaky grasp of "reducción" in the halting block makes the computable/c.e. synthesis unlearnable rather than merely hard.
+
+---
+
+## 3. Risk classification
+
+**🔴 High risk — these get the protected hours, never let them slip inside the 1-week buffer:**
+
+- **Lema de bombeo (regular y libre de contexto).** The classic "I understand it, I can't apply it" topic. The failure is never the statement of the lemma — it's picking the right word `w`, handling *every* case of the adversary's decomposition, and not silently assuming the pumping constant. Needs many *new* languages, not re-reading old proofs.
+- **Halting problem + diagonalización.** Abstract proof technique. Needs enough worked variants that the *shape* of the argument (assume decider → build contradictory program → apply to itself) becomes reflex.
+- **Computables vs. computablemente enumerables.** Synthesis topic and reliably exam-heavy: c.e. but not computable, closure properties, complement arguments, reductions. Depends on everything before it.
+- **DCFL / non-context-freeness subtleties.** Knowing *why* a language is not deterministic (and not just not context-free) is a distinct skill from the pumping lemma, and it decays fast without practice.
 
 **🟡 Medium risk:**
-- Microarchitecture / cache / pipeline (Arch #6) — conceptually dense, benefits heavily from drawing diagrams repeatedly.
-- PDA construction (Lang Theory) — practical construction skill, moderate practice load.
-- Turing Machines / S++ / universal interpreter (Lang Theory) — new formalism but more mechanical once pattern is seen.
 
-**🟢 Lower risk (still required, but more forgiving of a compressed pass):**
-- Intro, SIMD/MMX/SSE, Asm/Linking/Loading, Asm-HLL interface (Arch) — modular, memorizable, don't cascade if slightly delayed.
-- Optimization (Arch #11) — synthesis topic; naturally consolidates once 5/6/7-10 are solid, good candidate for late-phase work.
-- Chomsky hierarchy intro (Lang Theory) — orientation only.
+- **Autómatas de pila** — construction skill, mechanical once the pattern is there, but the equivalence with grammars needs real reps.
+- **Máquinas de Turing + funciones parcialmente computables** — new-ish formalism, more mechanical than it looks once you've built 3-4 machines.
+- **S++ / codificación de programas / intérprete universal** — heavy notation, low conceptual difficulty. Danger is notational sloppiness under pressure, not misunderstanding.
 
----
+**🟢 Lower risk (verify, don't invest):**
 
-## 4. Four-month roadmap (relative weeks — pin to real dates once published)
-
-Governing rule: for **each individual exam** (2 parciales + recuperatorio + final, per course), that exam's syllabus must be fully learned+practiced by 7 days before it. The phases below describe the general rhythm; actual boundaries shift once real exam dates arrive.
-
-- **Week 1 — Setup & calibration:** confirm actual pacing from professors, set up the spaced-review tracker (§6) and weekly checkpoint (§7), start Lang Theory foundations (Chomsky hierarchy → DFA) and Arch intro/Intel64 basics immediately — no "easing in" week, since the foundation topics are the highest-leverage material in the whole term.
-- **Weeks 2-4 — Foundations phase:** Lang Theory: push DFA/NFA/Regex to fluency, start pumping lemma (regular). Arch: complete Intel64 architecture deeply (addressing, segmentation), start Asm/Linking/HLL interface. This phase determines whether the rest of the term is manageable — extra caution and extra practice reps here, even if it feels slow.
-- **Weeks ~5-8 — Build-out toward Parcial 1:** Lang Theory moves into CFL/PDA. Arch moves into SIMD + starts Microarchitecture. First parcial per course likely lands near the end of this phase — the last 7 days before each must be pure practice/past-exams, per the core goal.
-- **Weeks ~9-12 — Deepening toward Parcial 2 (highest-risk phase):** Lang Theory hits its two hardest bottlenecks back to back (DCFL/non-CF + pumping lemma CF). Arch hits its densest stretch (Microarchitecture deep dive + OS Memory/Interrupts/Protection). Both courses' hardest material overlaps in calendar time — expect this to be the tightest phase; protect Thu-Sun study blocks aggressively here even if it means trimming lower-priority personal time.
-- **Weeks ~13-15 — Final stretch / synthesis:** Lang Theory: Turing machines, S++, halting problem, diagonalization, computable/CE languages. Arch: Task Management + Optimization (synthesis of everything). Recuperatorios likely fall in/around here.
-- **Last 2-3 weeks — Exam consolidation:** integrative practice exams, cross-topic review, weak-area triage, timed mock exams for both finals.
-
-**Reality check:** this is achievable but tight, not comfortable. The biggest structural risk isn't total hours — it's that Mon/Tue/Wed contribute almost nothing to study time, so Thu-Sun alone must carry ~10h/week of deliberate study on top of 15h of class. If weekends erode (social plans, work overflow, a bad training week), the "1 week ahead" buffer is what disappears first. Treat Thu-Sun study blocks as close to non-negotiable as the classes themselves.
+- **Jerarquía de Chomsky** — orientation. Should cost one session, ever.
+- **AFD / AFND / expresiones regulares** — assume this is your strongest area from last time, but *verify it in Week 1 rather than assuming*. If the diagnostic shows it's not automatic, it is instantly 🔴 and Phase 1 doubles in length: everything downstream is priced off this fluency.
+- **Tesis de Church** — conceptual, discussable, low mechanical load.
 
 ---
 
-## 5. Weekly study structure (steady-state, adjust in-phase)
+## 4. Roadmap
 
-| Day | Slot | Type | Notes |
+### Phase 0 — Week 1 (17-23 Aug): diagnostic, not study
+
+The single highest-leverage week. Do not start "reviewing from the beginning."
+
+1. Get past parciales and finales (cátedra page, classmates, previous years). Build `notes/parciales/`.
+2. **Take one full past Parcial 1 cold, timed, no notes.** It will go badly in places. That's the data.
+3. Grade it against §8's Red/Yellow/Green and fill in the tracker (§7) for every topic in §2.
+4. Do the same for a past Parcial 2 — untimed, and just *attempt* it. You're mapping which computability topics evaporated, not scoring yourself.
+5. Confirm with the cátedra: exam dates, the exact P1/P2 split, and whether the final is written, oral, or both.
+
+**Output of Week 1:** a per-topic Red/Yellow/Green map. Phases 1-4 below get re-weighted against it — Green topics get maintenance reps only, Red topics get the deep blocks.
+
+### Phase 1 — Weeks 2-4: bloque regular
+
+Regulares → AFD/AFND → expresiones regulares → lenguajes no regulares + lema de bombeo.
+
+- Weeks 2-3 compress the mechanical part hard: conversions (AFND→AFD, regex↔autómata), minimization, closure constructions. If the diagnostic showed this Green, **two sessions total**, then move on.
+- Reinvest the saved time in **week 4 = pumping lemma (regular), a full week for one topic.** Bottleneck #1 gets a disproportionate allocation on purpose.
+
+### Phase 2 — Weeks 5-7: bloque libre de contexto
+
+Gramáticas libres de contexto → autómatas de pila → determinísticos → no libres de contexto + lema de bombeo (LC).
+
+- Week 5: gramáticas + AP construction, both directions of the equivalence.
+- Week 6: DCFL — what determinism buys you (closure under complement) and what it costs.
+- Week 7: pumping lemma para LC + closure-property arguments. **Bottleneck #2.**
+
+### Weeks ~7-8: Parcial 1 consolidation
+
+Per the core rule: syllabus Green by the **end of Week 6**, wherever Parcial 1 actually lands. The final 7 days are timed past parciales only — full papers, exam conditions, then error-log every mistake (§5). No new material. No re-reading teóricas.
+
+### Phase 3 — Weeks 9-11: computabilidad, primera mitad
+
+Máquinas de Turing → funciones parcialmente computables → Tesis de Church.
+
+This is the formalism shift, and it's where the recursada advantage is largest — you already know where this is going. Build machines by hand early (Week 9), don't let it stay abstract.
+
+### Phase 4 — Weeks 12-14: computabilidad, segunda mitad
+
+S++ y codificación de programas → intérprete universal → halting problem → diagonalización → computables y c.e.
+
+- Week 12: S++ / codificación / intérprete universal. Mechanical, notation-heavy, moves fast.
+- Week 13: **halting + diagonalización. Bottleneck #3, full week.**
+- Week 14: computables vs. c.e. — reductions, closure, complement arguments. This is where the whole course integrates.
+
+### Weeks ~14-15: Parcial 2 consolidation
+
+Same rule: Green by end of Week 13. Final week = timed past parciales + error log.
+
+### Phase 5 — Final prep (post-parciales / turno de examen)
+
+The final is not "both parciales again" — it's the **connections**, which neither parcial tests:
+
+- **Classification drills.** Given an arbitrary language, place it in the hierarchy and *prove* the placement. This single exercise type integrates the entire course and should be the backbone of final prep.
+- Closure-property tables reproduced from memory for each class (regular / LC / DCFL / computable / c.e.), including which operations *break* which class and why.
+- The proof techniques side by side: when do you reach for pumping vs. closure properties vs. reduction vs. diagonalization? Being able to *choose* the technique is the actual final-exam skill.
+- If the final is **oral**: rehearse out loud, without notes, against a whiteboard. Include "why is this hypothesis necessary?" and "give me a counterexample if we drop it" — the standard oral follow-ups.
+
+**Recuperatorios** land in/around Weeks 16-17 if needed. If you take one, that week's plan is: error log for that parcial → targeted repair of only the Red topics → one fresh timed paper.
+
+---
+
+## 5. Weekly structure (~9h, steady state)
+
+The práctica is the spine. Everything else hangs off it.
+
+| Slot | Time | Type | What happens |
 |---|---|---|---|
-| Mon | Class 17-22 (Arch) | — | No deep study before/after. Optional 15 min flashcard review only if energy allows. |
-| Tue | Class 17-22 (Lang Theory) | — | Same. |
-| Wed | Class 17-22 (Arch) | — | Same. End of 3-day class gauntlet — expect low energy Thu morning. |
-| Thu | ~60-75 min | **Practice** | Targeted at Tuesday's Lang Theory content specifically — closest to "practice within 48h" ideal, since that course compounds. Retrieval/problem-solving, not rereading. |
-| Fri | ~90 min | **Practice / light deep work** | Targeted at Mon/Wed Arch content — tracing exercises, addressing/memory problems, diagrams. |
-| Sat | ~3.5-4h, split AM/PM with a real break | **Deep work + practice** | AM: hardest new concept of the week (whichever course has it that week). PM: problem sets/practice across both courses. Also the day to absorb any spillover from a rough week. |
-| Sun | ~2h | **Review + checkpoint** | Spaced-repetition touchpoints (§6), weekly checkpoint (§7, 15-30 min), light planning for next week. In later phases: exam simulation block. Protect the rest of Sunday for family/rest. |
+| **Práctica (class)** | fixed | Attend | Attempt problems live. Mark every exercise you couldn't start unaided — that list drives the week. |
+| **Same night** | 20-30 min | Capture | Write up what got solved *in class* into `notes/practica/`, in your own words. Not transcription. Cheapest retention win of the week. |
+| **Práctica + 1 day** | ~1h | **Retrieval** | Redo, from a blank page, the two problems you couldn't start in class. No notes on the first attempt. |
+| **Midweek** | ~1.5h | **Deep block** | The week's hardest topic. New constructions, proofs built from scratch. Schedule this when your energy is actually good — it's the block that carries the phase. |
+| **Late week** | ~1.5h | **Problem set** | Volume over depth: many short exercises across the current phase's topics. |
+| **Weekend AM** | ~3h | **Main block** | Split: ~90 min hard/new work, break, ~90 min mixed problems including one topic from an *earlier* phase (spaced review, §7). |
+| **Weekend PM/eve** | ~1.5h | **Review + checkpoint** | Cold recall of the week, spaced-review touchpoints, error log, checkpoint (§7). In consolidation weeks this becomes a timed exam simulation instead. |
 
-Total: ~15h class + ~9.5-10h deliberate outside study ≈ 25h/week academic time. This leaves room for ~30h work, 3-4 training sessions, sleep, and protected family time — but there's little slack. If this feels heavier than expected once real weeks start, the first thing to trim is Fri's practice length, not Sat/Sun (see §8).
+**≈ 9h/week.** In the 7 days before any exam, the whole budget converts to timed past papers + error-log repair. Nothing else.
 
----
+### The error log — do not skip this
 
-## 6. Study methodology per course
+One file: `notes/errores.md`. Every mistake on a practice problem or past exam gets one line: **what I got wrong → why (concept gap? notation slip? misread? time?) → the corrected idea in one sentence.**
 
-**Architecture — active techniques:**
-Assembly exercises; memory/addressing-mode problems; hand-drawn pipeline and microarchitecture diagrams (redraw from memory, don't trace a reference); cache associativity problems; execution tracing by hand; explaining User vs Kernel mode out loud without notes; interrupt/exception scenario walk-throughs; memory-translation (segmentation→linear→physical) exercises; comparing architectural approaches side by side (P5 vs P6 vs NetBurst vs Core); small coding/asm exercises.
+For a recursante this is worth more than any set of notes, because your errors are now *specific and repeating*, not diffuse. Re-read it before every exam. Patterns show up within three weeks — most people find they have four or five recurring mistakes, not fifty.
 
-**Language Theory — active techniques:**
-Construct DFAs/NFAs from scratch for a given language description (don't just read constructed ones); convert between NFA/DFA/regex representations; prove languages regular or non-regular using the pumping lemma on *new* languages each time; construct PDAs; prove context-freeness/non-context-freeness; Turing machine construction exercises; diagonalization arguments reproduced from scratch; computability proofs; solve previous exam problems on a rolling basis from week 3 onward, not just in the final week.
+### Active techniques (the only things that count as studying)
 
-**Simple rule for both courses:** if a study session doesn't involve producing something (a diagram, a proof, a solved problem, an explanation spoken/written without notes), it's not a study session — it's reading.
+Construct AFDs/AFNDs/regex for a language *description* you haven't seen; convert between all three representations; minimize; prove regularity and non-regularity on **new** languages every time; build gramáticas and APs in both directions of the equivalence; prove non-context-freeness; construct Turing machines by hand; write and encode S++ programs; reproduce the diagonalization argument from scratch on a blank page; build reductions to prove non-computability; classify arbitrary languages in the hierarchy with proof.
 
----
-
-## 7. Spaced-review system (lightweight)
-
-For every topic: **Learn → Review (within 3 days) → Practice (within a week) → Revisit (2-3 weeks later) → Exam practice (final week before its exam)**.
-
-Mechanics: keep a single running list (one shared note/spreadsheet is enough) with columns: Topic | Learned date | First review date | First practice date | Revisit date | Status (Green/Yellow/Red, see §9). Sunday's checkpoint is when this list gets updated and the coming week's revisit dates get scheduled. No app, no complex algorithm — just a list you actually look at once a week.
+**Rule for the whole plan:** if a session produced nothing — no proof, no automaton, no solved problem, no explanation spoken aloud without notes — it wasn't a study session. It was reading, and reading is exactly the failure mode a second pass is most vulnerable to.
 
 ---
 
-## 8. Weekly checkpoint (15-30 min, Sunday)
+## 6. Repo workflow
 
-Answer in writing, briefly:
-1. What did I learn this week?
-2. What can I solve without looking at notes?
-3. What am I still weak at?
-4. Am I ahead or behind the "1 week before exam" target for each course?
-5. Which topics are becoming risks (check against §3's high-risk list)?
-6. What's the priority for next week?
-7. How much real exam practice (not reading) did I do this week?
+The plan and the notes live in the same branch on purpose. Suggested layout:
 
----
+```
+notes/
+  teorica/     ← per-class conceptual notes (Clase 1 already here)
+  practica/    ← solved guías, one file per guía
+  parciales/   ← past exams + your timed attempts, with grades
+  errores.md   ← the error log (§5) — single file, append-only
+```
 
-## 9. Recovery protocol (for bad weeks — this is the resilience layer)
-
-**Cut first (in order):** Fri's practice session length → Sat's second (PM) block → non-essential social plans → training intensity (not frequency — keep showing up, shorten sessions).
-
-**Never sacrifice:** sleep, all three fixed classes, Sunday's 15-30 min checkpoint (even in a terrible week, this alone prevents drift from becoming invisible), and the two 🔴 high-risk topics active that week.
-
-**Deciding what to postpone:** postpone 🟢 low-risk topics first (they don't cascade). Never let a postponement push a 🔴 high-risk topic inside its own exam's final week — if forced to choose, protect Lang Theory foundations and Arch topic 2 above almost everything else, since they gate later material.
-
-**Recovering 1-2 lost weeks without wrecking the next one:** don't try to cram the backlog into one heroic session. Instead, extend Fri and Thu practice sessions by 20-30 min each for 2-3 weeks, and use one Sat AM block as a dedicated catch-up block instead of new material — new material for that week shifts to Sunday. Do not compress the "1 week before exam" buffer to make up time; if catch-up isn't possible without eating into that buffer, that's the signal in the next point.
-
-**Recognizing unsustainability:** if two consecutive Sunday checkpoints show "behind schedule" with no realistic catch-up slot, or training/sleep/family time have been cut for 3+ weeks running, that's not a scheduling problem to push through — it's a signal to either drop a lower-priority commitment temporarily or explicitly renegotiate scope (e.g., accept a thinner pass on 🟢 topics) rather than let the whole system degrade quietly.
+Commit per session, small and incremental — per the README's convention. The commit log doubles as an honest record of how much real work happened each week, which is useful input for the Sunday checkpoint.
 
 ---
 
-## 10. Mastery criteria — "I studied it" vs "I know it"
+## 7. Tracker, spaced review, checkpoint
 
-**🔴 Red (not yet mastered):** Can recognize the topic and roughly explain it with notes open. Cannot solve a representative problem unaided.
+**Per-topic cycle:** Learn/refresh → retrieval within 3 days → practice within a week → **revisit 2-3 weeks later** → timed practice in the final week before its exam.
 
-**🟡 Yellow (partial):** Can explain the concept from memory. Can solve the *standard* representative problem, but struggles with a variation or under time pressure. Cannot yet articulate common mistakes/edge cases.
+**Tracker:** one table (a note in this repo is fine) — `Topic | Status (R/Y/G) | Last practiced | Revisit due | Exam (P1/P2/Final)`. Updated once a week, at the checkpoint. No app, no algorithm.
 
-**🟢 Green (exam-ready):** Can explain it from memory, unprompted. Can solve a representative problem *and* a variation of it. Can identify common mistakes (why a plausible-looking wrong DFA/proof/answer fails). Can connect it explicitly to at least one earlier topic it depends on or interacts with.
+**Weekly checkpoint (15-20 min, weekend), in writing:**
 
-A topic only counts toward the "1 week ahead" goal once it's Green. Yellow is not "done" — it's a flag for the Sunday checkpoint.
+1. What can I now produce from a blank page that I couldn't last week?
+2. Which topics moved status? Which moved *backwards*?
+3. Am I ahead or behind the "Green 1 week before" line for the next exam?
+4. What does the error log say — any repeat offender showing up a third time?
+5. How many hours were real practice vs. reading? (If reading > 25%, correct next week.)
+6. Priority for next week: one topic, named.
 
 ---
 
-## First week — concrete starting plan
+## 8. Mastery criteria
 
-- **Before Monday's class:** set up the tracker (§6 mechanics) with all Arch and Lang Theory topics listed, status = Red.
-- **Mon (class, Arch):** attend, take notes oriented toward "what would a problem on this look like," not transcription.
-- **Tue (class, Lang Theory):** same. Chomsky hierarchy + start of regular languages likely covered.
-- **Wed (class, Arch):** Intel64 architecture likely starts here.
-- **Thu (~60-75 min):** first DFA-construction practice set from Tuesday's material — several small languages, build DFAs from scratch, no reference-checking until after attempting.
-- **Fri (~90 min):** first addressing-mode / memory-model problems from Mon/Wed Arch content.
-- **Sat (~3.5-4h):** AM — push Lang Theory to NFA and regex, with conversion exercises between DFA/NFA/regex. PM — continue Arch Intel64 (segmentation, pointer types), plus start a rough diagram of the User/Kernel mode split.
-- **Sun (~2h):** review everything from the week cold (no notes) to see what's actually retained; run the first weekly checkpoint; confirm real exam dates if published yet and report back so phase boundaries can be pinned down.
+**🔴 Red** — Recognize it, explain it roughly with notes open. Cannot solve a representative problem unaided.
 
-**Still needed from you when available:** exact exam dates (parciales, recuperatorio, final) for both courses as soon as published, and confirmation of your specific training days if you want them factored precisely rather than generically.
+**🟡 Yellow** — Explain it from memory. Solve the *standard* problem, but stall on a variation or run out of time. **For a recursante, Yellow is the default state of anything you haven't actively produced this term** — familiarity reads as Green and almost never is.
+
+**🟢 Green** — Explain from memory, unprompted. Solve a representative problem *and* a variation, at exam speed. Identify why a plausible-looking wrong answer fails (a bad word choice in a pumping proof, an AP that isn't deterministic, a reduction pointing the wrong way). Connect it to at least one earlier topic it depends on.
+
+Only Green counts toward the 1-week-early rule.
+
+---
+
+## 9. Recovery protocol
+
+**Cut in this order:** late-week problem set → weekend PM block (never the checkpoint itself, just shorten it) → the current phase's 🟢 topics.
+
+**Never cut:** práctica attendance, the 20-30 min same-night capture, the weekly checkpoint, and whichever 🔴 topic is active that week.
+
+**Recovering 1-2 lost weeks:** don't cram it into one heroic weekend — proof-construction skill doesn't build that way. Extend the midweek and late-week blocks by ~30 min for 2-3 weeks and convert one weekend AM into a catch-up block. **Never recover time by eating the 7-day pre-exam buffer** — that buffer is what converts Yellow into Green, and spending it is how a "prepared" exam turns into a failed one.
+
+**Unsustainability signal:** two consecutive checkpoints reporting "behind" with no realistic catch-up slot, or a 🔴 topic still Red inside its exam's final week. The response is to *narrow scope deliberately* — accept a thin pass on 🟢 topics and defend the bottlenecks — not to add hours and hope.
+
+---
+
+## Immediate next steps (Week 1)
+
+- [ ] Confirm exam dates, the P1/P2 topic split, and the final's format (written / oral / both). Then pin every phase boundary in §4 to real dates.
+- [ ] Collect past parciales and finales into `notes/parciales/`.
+- [ ] **Take one past Parcial 1 cold and timed.** This is the week's actual deliverable.
+- [ ] Attempt a past Parcial 2 untimed, to map what survived from the computability half.
+- [ ] Fill the tracker (§7) with all topics from §2, honestly graded against §8 — anything you haven't produced this term starts Yellow at best.
+- [ ] Create `notes/errores.md` and log the diagnostic's mistakes as its first entries.
+- [ ] Re-weight Phases 1-4 against the diagnostic and note the changes here.
