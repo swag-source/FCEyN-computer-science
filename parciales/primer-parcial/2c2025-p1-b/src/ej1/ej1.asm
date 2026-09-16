@@ -1,0 +1,31 @@
+;########### SECCION DE DATOS
+section .data
+
+;########### SECCION DE TEXTO (PROGRAMA)
+section .text
+
+; Completar las definiciones (serán revisadas por ABI enforcer):
+USUARIO_ID_OFFSET EQU 0
+USUARIO_NIVEL_OFFSET EQU 0
+USUARIO_SIZE EQU 0
+
+PRODUCTO_USUARIO_OFFSET EQU 0
+PRODUCTO_CATEGORIA_OFFSET EQU 0
+PRODUCTO_NOMBRE_OFFSET EQU 0
+PRODUCTO_ESTADO_OFFSET EQU 0
+PRODUCTO_PRECIO_OFFSET EQU 0
+PRODUCTO_ID_OFFSET EQU 0
+PRODUCTO_SIZE EQU 0
+
+PUBLICACION_NEXT_OFFSET EQU 0
+PUBLICACION_VALUE_OFFSET EQU 0
+PUBLICACION_SIZE EQU 0
+
+CATALOGO_FIRST_OFFSET EQU 0
+CATALOGO_SIZE EQU 0
+
+
+;producto_t* filtrarPublicacionesNuevasDeUsuariosVerificados (catalogo*)
+global filtrarPublicacionesNuevasDeUsuariosVerificados
+filtrarPublicacionesNuevasDeUsuariosVerificados:
+ret
