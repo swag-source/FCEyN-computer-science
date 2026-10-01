@@ -1,16 +1,21 @@
-# Para evitar subir binarios o .o, ignoro todo en la carpeta solucion
-# menos los archivos de codigo
-*.gdb_history
-
-src/test_utils/venv
-src/test_utils/*.txt
-!src/test_utils/requirements.txt
+# ---------------------------------------------------------------------------
+# Este archivo sobrevive a la consolidacion en el .gitignore de la raiz
+# porque hace algo que la raiz no hace: una whitelist por directorio.
+#
+# Para src/1 a src/4 ignora TODO el contenido y despues re-permite solo las
+# extensiones de codigo. Es mas estricto que una blacklist de artefactos:
+# cualquier archivo nuevo que no sea .asm/.c/.h/.md/.sh/.mac/Makefile queda
+# afuera por defecto, sin necesidad de agregarle un patron.
+#
+# Lo que SI esta en la raiz y por eso ya no esta aca: *.o, binarios de test,
+# .gdb_history, venv/, __pycache__, asm_defs.txt / global_foos.txt, .DS_Store.
+# ---------------------------------------------------------------------------
 
 !src/1\ -\ Introducción
 src/1\ -\ Introducción/*
 !src/1\ -\ Introducción/*.asm
 !src/1\ -\ Introducción/*.md
-!src/1\ -\ Introducción/Makefile 
+!src/1\ -\ Introducción/Makefile
 
 !src/2\ -\ ABI/
 src/2\ -\ ABI/*
@@ -42,9 +47,6 @@ src/4\ -\ Memoria\ dinámica/*
 !src/4\ -\ Memoria\ dinámica/*.sh
 !src/4\ -\ Memoria\ dinámica/*.mac
 
+# src/5, src/6 y src/7 no usan whitelist: los cubre el .gitignore de la raiz.
 !src/5\ -\ Pila
-
 !src/6\ -\ Ejercicios\ tipo\ parcial
-
-
-TP1-b/
