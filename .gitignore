@@ -53,14 +53,13 @@ c2nasm-ext.sh
 # Salida de esos scripts: asm generado por gcc, regenerable, nunca a mano.
 *.gcc-ref.asm
 
+# Estado generado por practica/ejercicios-parciales/alineacion/drill.py
+practica/ejercicios-parciales/alineacion/estado/
+
 # --- Repos de GitHub Classroom clonados adentro de este repo ---
 # Tienen su propio remote y su propio historial. Se dejan en disco pero
 # fuera de este repo para que no aparezcan en `git status`.
 parciales/primer-parcial/clase-preparcial/codigo-sin-resolver/
-
-# --- Varios ---
-banco-web.json
-TP1-b/
 
 # --- Sistema operativo / editores ---
 .DS_Store
