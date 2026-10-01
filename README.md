@@ -32,6 +32,47 @@ git checkout -b nombre-de-la-materia
 | `organizacion-del-computador-2` | Organización del Computador 2 | [browse](../../tree/organizacion-del-computador-2) |
 | `teoria-de-los-lenguajes` | Teoría de los Lenguajes | [browse](../../tree/teoria-de-los-lenguajes) |
 
+## El `.gitignore` compartido
+
+Vive en `main` y se mergea hacia cada rama (`main` -> rama). Es infraestructura,
+no contenido de curso, asi que no rompe la regla de "cada rama autocontenida",
+y toda rama nueva creada desde `main` lo hereda.
+
+Para actualizarlo: editarlo en `main`, commitear, y propagarlo.
+
+```bash
+git checkout main
+# editar .gitignore, commitear
+for b in organizacion-del-computador-2 teoria-de-los-lenguajes; do
+  git checkout $b && git merge main
+done
+```
+
+## Ojo: los archivos sin trackear no pertenecen a ninguna rama
+
+Es la trampa principal de tener una rama por materia. Git solo cambia los
+archivos *trackeados* al hacer `checkout`: todo lo que este sin trackear o
+ignorado **se queda en disco y aparece en todas las ramas**.
+
+Por eso los PDFs de Teoria de los Lenguajes aparecian estando en la rama de
+Orga 2, y las carpetas de Orga 2 aparecian estando en Teoria. Nunca estuvieron
+commiteados en la rama equivocada: estaban sin trackear, flotando.
+
+Dos consecuencias practicas:
+
+1. **Commitear el material en su rama lo antes posible.** Mientras este sin
+   trackear, te sigue a todas las ramas.
+2. `git status` limpio **no** significa carpeta limpia. Para ver que hay
+   flotando: `git status --ignored`.
+
+Si molesta ver las carpetas de las otras materias en disco, la solucion
+definitiva es un worktree por materia (una carpeta por rama, sin pisarse):
+
+```bash
+git worktree add ../FCEyN-orga2     organizacion-del-computador-2
+git worktree add ../FCEyN-lenguajes teoria-de-los-lenguajes
+```
+
 ## Conventions
 
 - Commit as you go — small, incremental commits per class/topic are more useful here than big batched dumps.
