@@ -18,7 +18,7 @@ bool EJERCICIO_1A_HECHO = false;
  * Funciones a implementar:
  *   - contarCombustibleAsignado
  */
-bool EJERCICIO_1B_HECHO = false;
+bool EJERCICIO_1B_HECHO = true;
 
 /**
  * Marca el ejercicio 1B como hecho (`true`) o pendiente (`false`).
@@ -31,17 +31,57 @@ bool EJERCICIO_1C_HECHO = false;
 /**
  * OPCIONAL: implementar en C
  */
-void optimizar(mapa_t mapa, attackunit_t* compartida, uint32_t (*fun_hash)(attackunit_t*)) {
+void optimizar(mapa_t mapa, attackunit_t *compartida, uint32_t (*fun_hash)(attackunit_t *))
+{
+    for (uint32_t i = 0; i < 255; i++)
+    {
+        for (uint32_t j = 0; j < 255; j++)
+        {
+            if (mapa[i][j] != 0 && fun_hash(mapa[i][j]) == fun_hash(compartida))
+            {
+                mapa[i][j]->references--;
+                if (mapa[i][j]->references == 0)
+                {
+                    free(mapa[i][j]);
+                }
+                mapa[i][j] = compartida;
+                compartida->references++;
+            }
+        }
+    }
 }
 
 /**
  * OPCIONAL: implementar en C
  */
-uint32_t contarCombustibleAsignado(mapa_t mapa, uint16_t (*fun_combustible)(char*)) {
+uint32_t contarCombustibleAsignado(mapa_t mapa, uint16_t (*fun_combustible)(char *))
+{
+    uint32_t res = 0;
+    for (uint32_t i = 0; i < 255; i++)
+    {
+        for (uint32_t j = 0; j < 255; j++)
+        {
+            if (mapa[i][j] != 0)
+            {
+                res += mapa[i][j]->combustible - fun_combustible(mapa[i][j]->clase);
+            }
+        }
+    }
+    return res;
 }
 
 /**
  * OPCIONAL: implementar en C
  */
-void modificarUnidad(mapa_t mapa, uint8_t x, uint8_t y, void (*fun_modificar)(attackunit_t*)) {
+void modificarUnidad(mapa_t mapa, uint8_t x, uint8_t y, void (*fun_modificar)(attackunit_t *))
+{
+    if (mapa[x][y] != 0)
+    {
+        if (mapa[x][y]->references)
+        {
+        }
+
+        return;
+    }
+    return;
 }

@@ -37,32 +37,24 @@ bool EJERCICIO_3_HECHO = true;
  *   - El valor `0` es `false`
  *   - Cualquier otro valor es `true`
  */
-bool hay_accion_que_toque(accion_t* accion, char* nombre) {
+bool hay_accion_que_toque(accion_t *accion, char *nombre)
+{
+	accion_t **idx = &accion;
+
+	while ((*idx) != NULL)
+	{
+		if (!strcmp((*idx)->destino->nombre, nombre))
+		{
+			return true;
+		}
+		(*idx) = (*idx)->siguiente;
+	}
+
 	return false;
 }
 
-/**
- * Invoca las acciones que fueron encoladas en la secuencia proporcionada en el
- * primer parámetro.
- *
- * A la hora de procesar una acción esta sólo se invoca si la carta destino
- * sigue en juego.
- *
- * Luego de invocar una acción, si la carta destino tiene cero puntos de vida,
- * se debe marcar ésta como fuera de juego.
- *
- * Las funciones que implementan acciones de juego tienen la siguiente firma:
- * ```c
- * void mi_accion(tablero_t* tablero, carta_t* carta);
- * ```
- * - El tablero a utilizar es el pasado como parámetro
- * - La carta a utilizar es la carta destino de la acción (`accion->destino`)
- *
- * Las acciones se deben invocar en el orden natural de la secuencia (primero
- * la primera acción, segundo la segunda acción, etc). Las acciones asumen este
- * orden de ejecución.
- */
-void invocar_acciones(accion_t* accion, tablero_t* tablero) {
+void invocar_acciones(accion_t *accion, tablero_t *tablero)
+{
 }
 
 /**
@@ -82,6 +74,25 @@ void invocar_acciones(accion_t* accion, tablero_t* tablero) {
  * El resultado debe ser escrito en las posiciones de memoria proporcionadas
  * como parámetro.
  */
-void contar_cartas(tablero_t* tablero, uint32_t* cant_rojas, uint32_t* cant_azules) {
+void contar_cartas(tablero_t *tablero, uint32_t *cant_rojas, uint32_t *cant_azules)
+{
 	*cant_rojas = *cant_azules = 0;
+
+	for (int i = 0; i < ALTO_CAMPO; i++)
+	{
+		for (int j = 0; j < ANCHO_CAMPO; j++)
+		{
+			if (tablero->campo[i][j] != NULL)
+			{
+				if (tablero->campo[i][j]->jugador == JUGADOR_AZUL)
+				{
+					*cant_azules = *cant_azules + 1;
+				}
+				if (tablero->campo[i][j]->jugador == JUGADOR_ROJO)
+				{
+					*cant_rojas = *cant_rojas + 1;
+				}
+			}
+		}
+	}
 }
