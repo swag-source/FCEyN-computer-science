@@ -1,0 +1,75 @@
+# ---------------------------------------------------------------------------
+# .gitignore compartido de todas las materias.
+#
+# Vive en `main` y se mergea hacia cada rama de materia (main -> rama).
+# Es infraestructura, no contenido de curso: no viola la convencion de
+# "cada rama es autocontenida" del README, y toda rama nueva creada desde
+# main lo hereda automaticamente.
+# ---------------------------------------------------------------------------
+
+# --- Artefactos de compilacion (C / ASM) ---
+*.o
+*.obj
+*.a
+*.so
+*.out
+*.elf
+
+# Binarios de test que generan los Makefiles de la catedra
+test_c
+test_asm
+test_abi
+main_c
+main_asm
+
+# --- Debugging ---
+.gdb_history
+*.gdb_history
+core
+vgcore.*
+*.dSYM/
+
+# --- Python (test_utils: parse.py, diff.py, parse_nasm_dbg.py) ---
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Salidas generadas por test_utils/parse.py a partir de los .c.
+# Se regeneran con `make`; no van al repo.
+# (El patron viejo usaba guiones -- test-utils/asm-defs.txt -- y nunca
+#  matcheaba, por eso se habian commiteado por error.)
+**/test_utils/asm_defs.txt
+**/test_utils/global_foos.txt
+**/test_utils/python_packages/
+
+# --- Tooling local, no contenido de curso ---
+# c2nasm.sh / c2nasm-ext.sh: compilan un .c y muestran el asm tipo NASM
+# que genera gcc, como referencia para comparar contra la version a mano.
+# Son scripts personales y estaban duplicados en 8 lugares.
+c2nasm.sh
+c2nasm-ext.sh
+
+# Salida de esos scripts: asm generado por gcc, regenerable, nunca a mano.
+*.gcc-ref.asm
+
+# --- Repos de GitHub Classroom clonados adentro de este repo ---
+# Tienen su propio remote y su propio historial. Se dejan en disco pero
+# fuera de este repo para que no aparezcan en `git status`.
+parciales/primer-parcial/clase-preparcial/codigo-sin-resolver/
+
+# --- Varios ---
+banco-web.json
+TP1-b/
+
+# --- Sistema operativo / editores ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
