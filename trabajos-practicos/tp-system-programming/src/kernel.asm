@@ -12,6 +12,7 @@ extern IDT_DESC
 extern pic_reset
 extern pic_enable
 extern screen_draw_layout
+extern idt_init
 
 %define CS_RING_0_SEL 0x8  
 %define DS_RING_0_SEL 0x18 
@@ -107,6 +108,8 @@ modo_protegido:
     ; ===================================
 
     ; Inicializar y cargar la IDT
+    call idt_init
+
     lidt [IDT_DESC]
     
     ; Reiniciar y habilitar el controlador de interrupciones (ver pic.c)    

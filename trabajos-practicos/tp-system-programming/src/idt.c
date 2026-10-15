@@ -28,7 +28,7 @@ idt_descriptor_t IDT_DESC = {sizeof(idt) - 1, (uint32_t)&idt};
     .offset_31_16 = HIGH_16_BITS(&_isr##numero),                               \
     .offset_15_0 = LOW_16_BITS(&_isr##numero),                                 \
     .segsel = GDT_CODE_0_SEL,                                                  \
-    .type = 0x2,                                                              \
+    .type = 0xE,                                                              \
     .dpl = 0x0,                                                                \
     .present = 0x1,                                                            \
   }
@@ -39,7 +39,7 @@ idt_descriptor_t IDT_DESC = {sizeof(idt) - 1, (uint32_t)&idt};
     .offset_31_16 = HIGH_16_BITS(&_isr##numero),                               \
     .offset_15_0 = LOW_16_BITS(&_isr##numero),                                 \
     .segsel = GDT_CODE_3_SEL,                                                  \
-    .type = 0x2,                                                               \
+    .type = 0xE,                                                               \
     .dpl = 0x3,                                                             \
     .present = 0x1                                                              \
   }
