@@ -24,7 +24,7 @@ void pic_reset() {
     // Inicialización del PIC1
     outb(PIC1_PORT, 0x11); // ICW1
     
-    outb(PIC1_PORT + 1, 0x8); // ICW2
+    outb(PIC1_PORT + 1, 0x20); // ICW2
     
     outb(PIC1_PORT + 1, 0x4); // ICW3
 
@@ -35,7 +35,7 @@ void pic_reset() {
     // Inicialización del PIC2
     outb(PIC2_PORT, 0x11); // ICW1
     
-    outb(PIC2_PORT + 1, 0x70); // ICW2
+    outb(PIC2_PORT + 1, 0x28); // ICW2
 
     outb(PIC2_PORT + 1, 0x2); // ICW3
 
