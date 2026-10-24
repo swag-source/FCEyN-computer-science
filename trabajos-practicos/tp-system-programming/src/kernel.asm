@@ -85,9 +85,7 @@ modo_protegido:
     ; COMPLETAR - reemplazar la implementacion de la interrupcion 88 (ver comentarios en isr.asm)
     ; COMPLETAR - La rutina de atención del page fault en isr.asm
     ; COMPLETAR - Inicializar el directorio de paginas
-
     ; COMPLETAR - Cargar directorio de paginas 
-
     ; COMPLETAR - Habilitar paginacion 
 
     ; ========================
@@ -127,12 +125,7 @@ modo_protegido:
     ; NOTA: Pueden chequear que las interrupciones funcionen forzando a que se
     ;       dispare alguna excepción (lo más sencillo es usar la instrucción
     ;       `int3`)
-    ;int3
-
-    ; COMPLETAR - Probar Sys_call (para etapas posteriores, comentar este código)
-
-    ; COMPLETAR - Probar generar una excepción (para etapas posteriores, comentar este código)
-    
+   
     ; ========================
     ; ||  (Parte 4: Tareas)  ||
     ; ========================

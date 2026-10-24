@@ -161,6 +161,7 @@ _isr32:
     ; 1. Le decimos al PIC que vamos a atender la interrupción
     ; 2. Imprimimos el reloj que gira en pantalla
     call next_clock
+    
     call pic_finish1
     ; 3. Actualizamos las estructuras compartidas ante el tick del reloj
     ; call tasks_tick ; DESCOMENTAR (Parte 4: Tareas)
@@ -199,8 +200,7 @@ global _isr88
 _isr88:
   ; Prologo
   pushad
-  mov eax, 0x58
-  
+  call task_syscall_draw
   ; Epilogo
   .fin:
   popad
