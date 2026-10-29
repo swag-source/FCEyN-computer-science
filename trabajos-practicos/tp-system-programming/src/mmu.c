@@ -96,24 +96,19 @@ paddr_t mmu_next_free_user_page(void)
  */
 paddr_t mmu_init_kernel_dir(void)
 {
-  uint32_t cr3 = rcr3();
-
-  // ¿Cuantas paginas necesito para armar las tablas? -> 1 página => 1 page table entry => 4MB de memoria física
-  paddr_t kernel_page = mmu_next_free_kernel_page();
-
-  // Map the requested kernel_page to the kernel virtual address
-  mmu_map_page(cr3, KERNEL_PAGE_DIR, kernel_page, MMU_P | MMU_U | MMU_W);
-
-  // Map the first 4MB of memory with identity mapping
-  for (int i = 0; i < identity_mapping_end; i++)
+  // Identity mapping of the first 4MB
+  for (uint32_t i = 0; i < 1024; i++)
   {
-    kpd[i].pt = kpt[i].page;
-    kpd[i].attrs = kpt[i].attrs | MMU_P | MMU_W | MMU_U;
-  };
+    kpt[i].page = i;
+    kpt[i].attrs = MMU_P | MMU_W;
+  }
+
+  kpd[0].pt = KERNEL_PAGE_TABLE_0 >> 12;
+  kpd[0].attrs = MMU_P | MMU_W;
 
   // Update the CR3 to the new cr3
-  tlbflush();
-  return (paddr_t)kpd;
+
+  return KERNEL_PAGE_DIR;
 }
 
 /*
@@ -127,39 +122,26 @@ paddr_t mmu_init_kernel_dir(void)
 void mmu_map_page(uint32_t cr3, vaddr_t virt, paddr_t phy, uint32_t attrs)
 {
   // Extract the base address of the page directory
-  pd_entry_t *pd_base_addr = (pd_entry_t *)CR3_TO_PAGE_DIR(cr3);
-  uint32_t pd_index = VIRT_PAGE_DIR(virt);
+  pd_entry_t *pd = (pd_entry_t *)CR3_TO_PAGE_DIR(cr3);
+  uint32_t pd_idx = VIRT_PAGE_DIR(virt);
 
   // Extract the page table entry address from the page directory
   // Verify if the PDE is present. If not, allocate a new page table.
-  if (pd_base_addr[pd_index].attrs & MMU_P == 0)
+  bool pd_entry_p = pd[pd_idx].attrs & MMU_P;
+  if (pd_entry_p == 0)
   {
-    pd_base_addr[pd_index].pt = mmu_next_free_kernel_page() >> 12; // Allocate a new page table
-    pd_base_addr[pd_index].attrs = attrs | MMU_P | MMU_W | MMU_U;  // Set the attributes of the PDE
+    paddr_t kernel_page = mmu_next_free_kernel_page();
+    zero_page((vaddr_t)kernel_page);
+    pd[pd_idx].pt = kernel_page >> 12;                // Allocate a new page table
+    pd[pd_idx].attrs = attrs | MMU_P | MMU_W | MMU_U; // Set the attributes of the PDE
   }
 
-  pt_entry_t *pt_entry = (pt_entry_t *)pd_base_addr[pd_index].pt;
+  pt_entry_t *pt = (pt_entry_t *)(pd[pd_idx].pt << 12);
+  uint32_t pt_index = VIRT_PAGE_TABLE(virt);
 
   // Verify if the page table is defined. If already defined, we map the page. If not, we need to allocate a new page table.
-  if (pt_entry == NULL)
-  {
-    kmemset(&pt_entry, 0x0, sizeof(pt_entry_t));
-    pt_entry->attrs = attrs | MMU_P | MMU_W | MMU_U;
-    pt_entry->page = phy >> 12;
-  };
-
-  if (pt_entry->attrs && MMU_P == 1)
-  {
-    // Page table present, map page.
-    pt_entry->page = phy >> 12;
-    pt_entry->attrs = attrs | MMU_P | MMU_W | MMU_U;
-  }
-  else
-  {
-    // Page table not present. Request a new page table and map the page.
-    pt_entry->page = mmu_next_free_kernel_page() >> 12; // Allocate a new page table
-    pt_entry->attrs = attrs | MMU_P | MMU_W | MMU_U;
-  }
+  pt[pt_index].page = phy >> 12;
+  pt[pt_index].attrs = attrs | MMU_P;
 
   // Update the CR3 register with the new cr3
   tlbflush();
@@ -173,32 +155,37 @@ void mmu_map_page(uint32_t cr3, vaddr_t virt, paddr_t phy, uint32_t attrs)
 paddr_t mmu_unmap_page(uint32_t cr3, vaddr_t virt)
 {
   // Extract the base address of the page directory
-  pd_entry_t *pd_base_addr = (pd_entry_t *)CR3_TO_PAGE_DIR(cr3);
-  uint32_t pd_index = VIRT_PAGE_DIR(virt);
+  pd_entry_t *pd_base = (pd_entry_t *)CR3_TO_PAGE_DIR(cr3);
+  uint32_t pd_idx = VIRT_PAGE_DIR(virt);
 
-  // Verify if the page table is defined and present. If not, we cannot unmap the page.
-  if (pd_base_addr[pd_index].attrs & MMU_P == 0)
+  // Verify if the associated page directory entry is defined and present. If not, we cannot unmap the page.
+  bool pd_entry_present = pd_base[pd_idx].attrs & MMU_P;
+  if (pd_entry_present == 0)
   {
     return 0; // Page table not present, cannot unmap page.
   }
 
   // Verify if the page frame is defined and present. If not, we cannot unmap the page frame.
   // Extract the base address of the page table
-  pt_entry_t *pt_base_addr = (pt_entry_t *)pd_base_addr[pd_index].pt;
+  pt_entry_t *pt_base = pd_base[pd_idx].pt << 12;
   uint32_t pt_index = VIRT_PAGE_TABLE(virt);
 
-  if (pt_base_addr[pt_index].attrs & MMU_P == 0)
+  bool pt_entry_present = pt_base[pt_index].attrs & MMU_P;
+  if (pt_entry_present == 0)
   {
     return 0;
   }
 
-  // Clean the page from its page_frame
-  zero_page(pt_base_addr[pt_index].page);
+  paddr_t page_number = pt_base[pt_index].page << 12;
+
+  // Clear the page table entry
+  pt_base[pt_index].page = 0x0;
+  pt_base[pt_index].attrs = 0x0;
 
   // Update the CR3 register with the new cr3
   tlbflush();
 
-  return pt_base_addr[pt_index].page;
+  return page_number;
 }
 
 #define DST_VIRT_PAGE 0xA00000
@@ -218,19 +205,24 @@ void copy_page(paddr_t dst_addr, paddr_t src_addr)
   uint32_t cr3 = rcr3();
 
   // Map (SRC_VIRT_PAGE, src_addr)
-  uint32_t src_attributes = 0xFFFFFFFF;
+  uint32_t src_attributes = MMU_P | MMU_U | MMU_W;
   mmu_map_page(cr3, SRC_VIRT_PAGE, src_addr, src_attributes);
 
   // Map DST_VIRT_PAGE
-  uint32_t dst_attributes = 0xFFFFFFFF;
+  uint32_t dst_attributes = MMU_P | MMU_U | MMU_W;
   mmu_map_page(cr3, DST_VIRT_PAGE, dst_addr, dst_attributes);
 
-  // Map (SRC_VIRT_PAGE, src_addr) -> (DST_VIRT_PAGE, dst_addr)
-  mmu_map_page(cr3, SRC_VIRT_PAGE, DST_VIRT_PAGE, dst_attributes);
+  // Copy each entry of the source page (virtual) into the destination (virtual)
+  uint32_t *src = (uint32_t *)SRC_VIRT_PAGE;
+  uint32_t *dst = (uint32_t *)DST_VIRT_PAGE;
+  for (uint32_t i = 0; i < 1024; i++)
+  {
+    dst[i] = src[i];
+  }
 
   // Unmap pages respectively
-  mmu_unmap_page(cr3, DST_VIRT_PAGE);
   mmu_unmap_page(cr3, SRC_VIRT_PAGE);
+  mmu_unmap_page(cr3, DST_VIRT_PAGE);
 }
 
 /**
@@ -240,13 +232,45 @@ void copy_page(paddr_t dst_addr, paddr_t src_addr)
  */
 paddr_t mmu_init_task_dir(paddr_t phy_start)
 {
+  // Request a page from the kernel
+  pd_entry_t *kernel_page = (pd_entry_t *)mmu_next_free_kernel_page();
+
+  // Clean page
+  zero_page((vaddr_t)kernel_page);
+
+  // Copy the kernel mappings to the requested page
+  kernel_page[0] = kpd[0];
+
+  paddr_t cr3 = (paddr_t)kernel_page;
+
+  // User mappings
+  paddr_t stack_page = mmu_next_free_user_page();
+  mmu_map_page(cr3, TASK_CODE_VIRTUAL, phy_start, MMU_P | MMU_U);
+  mmu_map_page(cr3, TASK_CODE_VIRTUAL + PAGE_SIZE, phy_start + PAGE_SIZE, MMU_P | MMU_U);
+  mmu_map_page(cr3, TASK_STACK_BASE - PAGE_SIZE, stack_page, MMU_P | MMU_U | MMU_W);
+  mmu_map_page(cr3, TASK_SHARED_PAGE, SHARED, MMU_P);
+
+  // Update the CR3
+  tlbflush();
+
+  return kernel_page;
 }
 
-// COMPLETAR: devuelve true si se atendió el page fault y puede continuar la ejecución
-// y false si no se pudo atender
 bool page_fault_handler(vaddr_t virt)
 {
   print("Atendiendo page fault...", 0, 0, C_FG_WHITE | C_BG_BLACK);
-  // Chequeemos si el acceso fue dentro del area on-demand
-  // En caso de que si, mapear la pagina
+
+  // Check if the virtual address is within [ON_DEMAND_MEM_END_VIRTUAL : ON_DEMAND_MEM_START_VIRTUAL]
+  if (virt <= ON_DEMAND_MEM_END_VIRTUAL && virt >= ON_DEMAND_MEM_START_VIRTUAL)
+  {
+    // Map the new page
+    uint32_t cr3 = rcr3();
+    paddr_t page = mmu_next_free_user_page();
+    mmu_map_page(cr3, virt, page, MMU_P | MMU_U | MMU_W);
+
+    // Update the memory mapping of the process
+    tlbflush();
+    return 1;
+  }
+  return 0;
 }

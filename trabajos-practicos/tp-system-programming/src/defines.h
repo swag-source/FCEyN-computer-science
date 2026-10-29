@@ -86,11 +86,11 @@ TALLER System Programming - Arquitectura y Organizacion de Computadoras - FCEN
 /* Parte 3: Paginación - defines para MMU */
 /* -------------------------------------------------------------------------- */
 
-#define VIRT_PAGE_OFFSET(X) (X & 0x00000FFF)      // VIRTUAL_ADDRESS_OFFSET = X[0:11]
-#define VIRT_PAGE_TABLE(X) (X >> 10) & 0x000003FF // VIRTUAL_ADDRESS_TABLE = X[12:21]
-#define VIRT_PAGE_DIR(X) (X >> 22) & 0x000003FF   // VIRTUAL_ADDRESS_DIRECTORY = X[22:31]
-#define CR3_TO_PAGE_DIR(X) (X & 0xFFFFF000)       // PAGE_DIRECTORY_BASE = CR3[12:31]
-#define MMU_ENTRY_PADDR(X) 
+#define VIRT_PAGE_OFFSET(X) ((X) & 0x00000FFF)        // VIRTUAL_ADDRESS_OFFSET = X[0:11]
+#define VIRT_PAGE_TABLE(X) (((X) >> 12) & 0x000003FF) // VIRTUAL_ADDRESS_TABLE = X[12:21]
+#define VIRT_PAGE_DIR(X) (((X) >> 22) & 0x000003FF)   // VIRTUAL_ADDRESS_DIRECTORY = X[22:31]
+#define CR3_TO_PAGE_DIR(X) (((X) & 0xFFFFF000))       // PAGE_DIRECTORY_BASE = CR3[12:31]
+#define MMU_ENTRY_PADDR(X)
 
 #define MMU_P (1 << 0)
 #define MMU_W (1 << 1)

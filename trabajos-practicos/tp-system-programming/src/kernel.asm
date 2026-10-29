@@ -13,6 +13,7 @@ extern pic_reset
 extern pic_enable
 extern screen_draw_layout
 extern idt_init
+extern mmu_init_kernel_dir
 
 %define CS_RING_0_SEL 0x8  
 %define DS_RING_0_SEL 0x18 
@@ -57,6 +58,7 @@ start:
     jmp CS_RING_0_SEL:modo_protegido
 
 BITS 32
+
 modo_protegido:
     ; Establecer selectores de segmentos DS, ES, GS, FS y SS en el segmento de datos de nivel 0
     mov ax, DS_RING_0_SEL
@@ -79,14 +81,23 @@ modo_protegido:
     ; ===================================
     ; ||     (Parte 3: Paginación)     ||
     ; ===================================
-    
+
     ; COMPLETAR - los defines para la MMU en defines.h
     ; COMPLETAR - las funciones en mmu.c
     ; COMPLETAR - reemplazar la implementacion de la interrupcion 88 (ver comentarios en isr.asm)
     ; COMPLETAR - La rutina de atención del page fault en isr.asm
-    ; COMPLETAR - Inicializar el directorio de paginas
-    ; COMPLETAR - Cargar directorio de paginas 
-    ; COMPLETAR - Habilitar paginacion 
+    
+    ; Inicializar el directorio de paginas
+    call mmu_init_kernel_dir
+
+    ; COMPLETAR - Cargar directorio de paginas
+    mov cr3, eax
+
+    ; Habilitar paginacion (seteo el bit de paging en 1)
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
+    
 
     ; ========================
     ; ||  (Parte 4: Tareas) ||

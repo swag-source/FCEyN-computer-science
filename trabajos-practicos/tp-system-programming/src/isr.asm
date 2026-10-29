@@ -133,7 +133,7 @@ ISRE 10
 ISRE 11
 ISRE 12
 ISRE 13
-ISRE 14 ; comentar esta línea en la parte 3 (paginación)
+; ISRE 14 ; comentar esta línea en la parte 3 (paginación)
 ISRNE 15
 ISRNE 16
 ISRE 17
@@ -143,21 +143,36 @@ ISRNE 20
 
 ;; Rutina de atención de Page Fault ISRE 14 ; Descomentar esta rutina en la parte 3 (paginación)
 ;; -------------------------------------------------------------------------- ;;
-;global _isr14
+global _isr14
 
-;_isr14:
-;	add esp, 4 ; error code
-;	iret
+_isr14:
+	; Prologo
+    pushad 
+    mov edi, cr2   
+    push edi ; Push CR2 as an argument for the page_fault_handler (through stack)
+    call page_fault_handler
+    add esp, 4 ; Restore the stack top value
+
+    ; Verify if the page fault was handled correctly by the handler
+    cmp al, 1
+    jne .unhandled    
+
+    ; Case handled
+    popad
+	iret
+    
+    ; Case unhandled
+.unhandled:
+    popad
+    ISRc 14
 
 ;; Rutina de atención del RELOJ
 ;; -------------------------------------------------------------------------- ;;
 global _isr32
-; COMPLETAR (Parte 2: Interrupciones): La rutina se encuentra escrita parcialmente. Completar la rutina
+; (Parte 2: Interrupciones): La rutina se encuentra escrita parcialmente. Completar la rutina
 _isr32:
     ; Prologo
     pushad
-
-
     ; 1. Le decimos al PIC que vamos a atender la interrupción
     ; 2. Imprimimos el reloj que gira en pantalla
     call next_clock
@@ -165,6 +180,7 @@ _isr32:
     call pic_finish1
     ; 3. Actualizamos las estructuras compartidas ante el tick del reloj
     ; call tasks_tick ; DESCOMENTAR (Parte 4: Tareas)
+  
     ; 4. Actualizamos la "interfaz" del sistema en pantalla
     ; call tasks_screen_update ; DESCOMENTAR (Parte 4: Tareas)
     
@@ -182,7 +198,11 @@ _isr33:
     pushad
     ; 1. Le decimos al PIC que vamos a atender la interrupción
     ; 2. Leemos la tecla desde el teclado y la procesamos con la funcion process_scancode (Durante Parte 2: Interrupciones) o tasks_input_process (Durante Parte 4: Tareas)
+    ; Read the keyboard scancode and process it
+    in al, 0x60
+    push eax
     call process_scancode
+    add esp, 4
     call pic_finish1
     
     ; Epilogo
@@ -196,11 +216,16 @@ _isr33:
 
 global _isr88
 ; Para la seccion de interrupciones: que modifique el valor de eax por 0x58
-; Para las secciones de paginación y tareas: que llame a la funcion task_syscall_draw
+; Para las secciones de paginación y tareas: que llame a la funcion tasks_syscall_draw
 _isr88:
   ; Prologo
   pushad
-  call task_syscall_draw
+  ; Sección interrupciones
+  ; mov eax, 0x58
+  
+  ; Sección paginación y tareas
+  call tasks_syscall_draw
+
   ; Epilogo
   .fin:
   popad
@@ -213,7 +238,6 @@ _isr98:
     ; Prologo
     pushad
     mov eax, 0x62
-    call pic_finish1
     
     ; Epilogo
     .fin:
