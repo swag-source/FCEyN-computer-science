@@ -41,7 +41,7 @@ start:
     int 10h ; load 8x8 font
 
     ; Imprimir mensaje de bienvenida - MODO REAL
-    print_text_rm start_rm_msg, start_rm_len, 1, 1, 1
+    print_text_rm start_rm_msg, start_rm_len, 1, 0, 0
 
     ; Habilitar A20
     call A20_enable
@@ -73,7 +73,7 @@ modo_protegido:
     mov esp, ebp
     
     ; Imprimir mensaje de bienvenida - MODO PROTEGIDO (Parte 1: Pasaje a modo protegido)
-    print_text_pm start_pm_msg, start_pm_len, 1, 1, 1
+    print_text_pm start_pm_msg, start_pm_len, 1, 2, 0
 
     ; Inicializar pantalla (Parte 1: Pasaje a modo protegido)
     call screen_draw_layout 

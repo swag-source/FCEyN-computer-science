@@ -22,7 +22,8 @@ uint32_t current_task = 0;
  *
  * @param task_id la tarea a deshabilitar
  */
-void sched_disable_task(int8_t task_id) {
+void sched_disable_task(int8_t task_id)
+{
   kassert(task_id >= 0 && task_id < MAX_TASKS, "Invalid task_id");
   tasks[task_id].sched_state = TASK_PAUSED;
 }
@@ -32,7 +33,8 @@ void sched_disable_task(int8_t task_id) {
  *
  * @param task_id la tarea a habilitar
  */
-void sched_enable_task(int8_t task_id) {
+void sched_enable_task(int8_t task_id)
+{
   kassert(task_id >= 0 && task_id < MAX_TASKS, "Invalid task_id");
   tasks[task_id].sched_state = TASK_RUNNABLE;
 }
@@ -43,12 +45,15 @@ void sched_enable_task(int8_t task_id) {
  *
  * @return uint16_t el selector de segmento de la tarea a saltar
  */
-uint32_t sched_next_task(void) {
+uint32_t sched_next_task(void)
+{
   // Buscamos la próxima tarea viva (comenzando en la actual)
   int8_t i;
-  for (i = (current_task + 1); (i % MAX_TASKS) != current_task; i++) {
+  for (i = (current_task + 1); (i % MAX_TASKS) != current_task; i++)
+  {
     // Si esta tarea está disponible la ejecutamos
-    if (tasks[i % MAX_TASKS].sched_state == TASK_RUNNABLE) {
+    if (tasks[i % MAX_TASKS].sched_state == TASK_RUNNABLE)
+    {
       break;
     }
   }
@@ -57,7 +62,8 @@ uint32_t sched_next_task(void) {
   i = i % MAX_TASKS;
 
   // Si la tarea que encontramos es ejecutable entonces vamos a correrla.
-  if (tasks[i].sched_state == TASK_RUNNABLE) {
+  if (tasks[i].sched_state == TASK_RUNNABLE)
+  {
     current_task = i;
     return i;
   }
