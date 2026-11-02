@@ -96,6 +96,8 @@ paddr_t mmu_next_free_user_page(void)
  */
 paddr_t mmu_init_kernel_dir(void)
 {
+  zero_page((vaddr_t)kpd);
+
   // Identity mapping of the first 4MB
   for (uint32_t i = 0; i < 1024; i++)
   {
@@ -248,12 +250,12 @@ paddr_t mmu_init_task_dir(paddr_t phy_start)
   mmu_map_page(cr3, TASK_CODE_VIRTUAL, phy_start, MMU_P | MMU_U);
   mmu_map_page(cr3, TASK_CODE_VIRTUAL + PAGE_SIZE, phy_start + PAGE_SIZE, MMU_P | MMU_U);
   mmu_map_page(cr3, TASK_STACK_BASE - PAGE_SIZE, stack_page, MMU_P | MMU_U | MMU_W);
-  mmu_map_page(cr3, TASK_SHARED_PAGE, SHARED, MMU_P);
+  mmu_map_page(cr3, TASK_SHARED_PAGE, SHARED, MMU_P | MMU_U);
 
   // Update the CR3
   tlbflush();
 
-  return kernel_page;
+  return cr3;
 }
 
 bool page_fault_handler(vaddr_t virt)
@@ -265,11 +267,14 @@ bool page_fault_handler(vaddr_t virt)
   {
     // Map the new page
     uint32_t cr3 = rcr3();
-    paddr_t page = mmu_next_free_user_page();
-    mmu_map_page(cr3, virt, page, MMU_P | MMU_U | MMU_W);
+
+    paddr_t phy_page = ON_DEMAND_MEM_START_PHYSICAL;
+
+    mmu_map_page(cr3, virt, phy_page, MMU_P | MMU_U | MMU_W);
 
     // Update the memory mapping of the process
     tlbflush();
+
     return 1;
   }
   return 0;

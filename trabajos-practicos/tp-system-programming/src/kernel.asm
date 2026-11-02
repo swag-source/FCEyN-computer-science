@@ -13,7 +13,11 @@ extern pic_reset
 extern pic_enable
 extern screen_draw_layout
 extern idt_init
+extern tss_init
+extern tasks_init
 extern mmu_init_kernel_dir
+extern mmu_init_task_dir
+
 
 %define CS_RING_0_SEL 0x8  
 %define DS_RING_0_SEL 0x18 
@@ -82,15 +86,11 @@ modo_protegido:
     ; ||     (Parte 3: Paginación)     ||
     ; ===================================
 
-    ; COMPLETAR - los defines para la MMU en defines.h
-    ; COMPLETAR - las funciones en mmu.c
-    ; COMPLETAR - reemplazar la implementacion de la interrupcion 88 (ver comentarios en isr.asm)
-    ; COMPLETAR - La rutina de atención del page fault en isr.asm
     
     ; Inicializar el directorio de paginas
     call mmu_init_kernel_dir
 
-    ; COMPLETAR - Cargar directorio de paginas
+    ; Cargar directorio de paginas
     mov cr3, eax
 
     ; Habilitar paginacion (seteo el bit de paging en 1)
@@ -98,18 +98,6 @@ modo_protegido:
     or eax, 0x80000000
     mov cr0, eax
     
-
-    ; ========================
-    ; ||  (Parte 4: Tareas) ||
-    ; ========================
-
-    ; COMPLETAR - reemplazar la implementacion de la interrupcion 88 (ver comentarios en isr.asm)
-    ; COMPLETAR - las funciones en tss.c
-    ; COMPLETAR - Inicializar tss
-
-    ; COMPLETAR - Inicializar el scheduler
-
-    ; COMPLETAR - Inicializar las tareas
 
 
     ; ===================================
@@ -126,17 +114,18 @@ modo_protegido:
     
     call pic_enable
     
-    ; Rutinas de atención de reloj, teclado, e interrupciones 88 y 89 (en isr.asm)
-
-    ; COMPLETAR (Parte 4: Tareas)- Cargar tarea inicial
-
-    ; COMPLETAR - Habilitar interrupciones (!! en etapas posteriores, evaluar si se debe comentar este código !!)
     sti
 
-    ; NOTA: Pueden chequear que las interrupciones funcionen forzando a que se
-    ;       dispare alguna excepción (lo más sencillo es usar la instrucción
-    ;       `int3`)
-   
+    call tss_init
+
+    ; Inicializo el TR con el descriptor de segmento correspondiente a la TSS (gdt[11])
+    mov ax, 0x58
+    ltr ax
+
+    ; Inicializar las tareas
+    call tasks_init
+
+
     ; ========================
     ; ||  (Parte 4: Tareas)  ||
     ; ========================
@@ -144,10 +133,13 @@ modo_protegido:
     ; COMPLETAR - Inicializar el directorio de paginas de la tarea de prueba
 
     ; COMPLETAR - Cargar directorio de paginas de la tarea
+    call mmu_init_task_dir
 
     ; COMPLETAR - Restaurar directorio de paginas del kernel
 
     ; COMPLETAR - Saltar a la primera tarea: Idle
+    ; jmp TASK_IDLE_CODE_START:0
+
 
     ; Ciclar infinitamente 
     mov eax, 0xFFFF

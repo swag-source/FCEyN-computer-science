@@ -150,6 +150,7 @@ _isr14:
     pushad 
     mov edi, cr2   
     push edi ; Push CR2 as an argument for the page_fault_handler (through stack)
+    
     call page_fault_handler
     add esp, 4 ; Restore the stack top value
 
@@ -197,13 +198,14 @@ _isr33:
     ; Prologo
     pushad
     ; 1. Le decimos al PIC que vamos a atender la interrupción
+    call pic_finish1
+
     ; 2. Leemos la tecla desde el teclado y la procesamos con la funcion process_scancode (Durante Parte 2: Interrupciones) o tasks_input_process (Durante Parte 4: Tareas)
-    ; Read the keyboard scancode and process it
     in al, 0x60
     push eax
+
     call process_scancode
     add esp, 4
-    call pic_finish1
     
     ; Epilogo
     .fin:
@@ -222,10 +224,10 @@ _isr88:
   pushad
   ; Sección interrupciones
   ; mov eax, 0x58
-  
+  push eax  
   ; Sección paginación y tareas
   call tasks_syscall_draw
-
+  add esp, 4
   ; Epilogo
   .fin:
   popad
