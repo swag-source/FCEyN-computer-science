@@ -49,7 +49,7 @@ LDFLAGS=-static -m elf_i386 -b elf32-i386 -e start -Ttext 0x1200
 
 # QEMU
 PIDFILE = /tmp/qemu.pid
-QEMU_ARGS = -S -drive format=raw,if=floppy,file=$(DISK_IMG) -daemonize -pidfile $(PIDFILE)
+QEMU_ARGS = -S -drive format=raw,if=floppy,file=$(DISK_IMG) -daemonize -pidfile $(PIDFILE) -d int,cpu_reset -D $(CURDIR)/qemu.log -no-reboot -no-shutdown
 
 QUIET = @
 

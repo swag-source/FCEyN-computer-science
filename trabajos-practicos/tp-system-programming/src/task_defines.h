@@ -2,7 +2,7 @@
 #define __TASK_DEFINES_H__
 
 /* GDT */
-#define GDT_IDX_TASK_INITIAL         11
+#define GDT_IDX_TASK_INITIAL 11
 
 /* Direcciones fisicas de codigos */
 /* -------------------------------------------------------------------------- */
@@ -13,7 +13,7 @@
 
 #define TASK_A_CODE_START (0x00018000)
 #define TASK_B_CODE_START (0x0001A000)
-#define TASK_IDLE_CODE_START   (0x0001C000)
+#define TASK_IDLE_CODE_START (0x0001C000)
 
 /* EFLAGS */
 
@@ -34,13 +34,15 @@
  * - `TASK_RUNNABLE`: La tarea se puede ejecutar
  * - `TASK_PAUSED`: La tarea se registró al scheduler pero está pausada
  */
-typedef enum {
-  TASK_SLOT_FREE,
-  TASK_RUNNABLE,
-  TASK_PAUSED
+typedef enum
+{
+	TASK_SLOT_FREE,
+	TASK_RUNNABLE,
+	TASK_PAUSED
 } task_state_t;
 
-typedef struct {
+typedef struct
+{
 	task_state_t sched_state;
 	uint32_t eax;
 	uint32_t ebx;

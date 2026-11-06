@@ -17,7 +17,7 @@ extern tss_init
 extern tasks_init
 extern mmu_init_kernel_dir
 extern mmu_init_task_dir
-
+extern switch_to_usermode
 
 %define CS_RING_0_SEL 0x8  
 %define DS_RING_0_SEL 0x18 
@@ -30,6 +30,8 @@ start_rm_len equ    $ - start_rm_msg
 
 start_pm_msg db     'Iniciando kernel en Modo Protegido'
 start_pm_len equ    $ - start_pm_msg
+
+
 
 ; Punto de entrada del kernel.
 BITS 16
@@ -63,6 +65,27 @@ start:
 
 BITS 32
 
+task_swap_test:
+    ; Pido el CR3 de la tarea de prueba
+    mov eax, 0x18000
+    push eax
+    call mmu_init_task_dir 
+    add esp, 4
+
+    ; Guardo el CR3 del kernel
+    mov ebx, cr3
+
+    ; Guardo el CR3 de la tarea de prueba
+    mov cr3, eax
+
+    ; Realizo dos escrituras en la zona de memoria compartida on-demand
+    mov dword [0x07000000], 0xDEADBEEF
+    mov dword [0x07000008], 0xCAFEBABE
+
+    mov cr3, ebx ; Vuelvo a cargar el CR3 del kernel
+
+    jmp tasks
+
 modo_protegido:
     ; Establecer selectores de segmentos DS, ES, GS, FS y SS en el segmento de datos de nivel 0
     mov ax, DS_RING_0_SEL
@@ -83,24 +106,6 @@ modo_protegido:
     call screen_draw_layout 
 
     ; ===================================
-    ; ||     (Parte 3: Paginación)     ||
-    ; ===================================
-
-    
-    ; Inicializar el directorio de paginas
-    call mmu_init_kernel_dir
-
-    ; Cargar directorio de paginas
-    mov cr3, eax
-
-    ; Habilitar paginacion (seteo el bit de paging en 1)
-    mov eax, cr0
-    or eax, 0x80000000
-    mov cr0, eax
-    
-
-
-    ; ===================================
     ; ||   (Parte 2: Interrupciones)   ||
     ; ===================================
 
@@ -116,30 +121,43 @@ modo_protegido:
     
     sti
 
-    call tss_init
+    ; ===================================
+    ; ||     (Parte 3: Paginación)     ||
+    ; ===================================
+    
+    ; Inicializar el directorio de paginas
+    call mmu_init_kernel_dir
 
-    ; Inicializo el TR con el descriptor de segmento correspondiente a la TSS (gdt[11])
-    mov ax, 0x58
-    ltr ax
+    ; Cargar directorio de paginas
+    mov cr3, eax
 
-    ; Inicializar las tareas
-    call tasks_init
+    ; Habilitar paginacion (seteo el bit de paging en 1)
+    mov eax, cr0
+    or eax, 0x80000000
+    mov cr0, eax
 
-
+    ; Prueba (intercambio el CR3 de una tarea con el del kernel)
+    ; jmp task_swap_test
+tasks:
     ; ========================
     ; ||  (Parte 4: Tareas)  ||
     ; ========================
-    
-    ; COMPLETAR - Inicializar el directorio de paginas de la tarea de prueba
+    call tss_init
 
-    ; COMPLETAR - Cargar directorio de paginas de la tarea
+    ; Inicializo el TR con el descriptor de segmento correspondiente a la TSS
+    mov ax, 0x58 ; indice 11 de la GDT
+    ltr ax
+
+    ; Inicializar la TSS para el almacenamiento de tareas
+    call tasks_init
+
+    ; Inicializo task dir IDLE
+    push DWORD 0x18000
     call mmu_init_task_dir
+    add esp, 4
 
-    ; COMPLETAR - Restaurar directorio de paginas del kernel
-
-    ; COMPLETAR - Saltar a la primera tarea: Idle
-    ; jmp TASK_IDLE_CODE_START:0
-
+    mov cr3, eax
+    call switch_to_usermode
 
     ; Ciclar infinitamente 
     mov eax, 0xFFFF
